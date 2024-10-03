@@ -1,7 +1,15 @@
 ﻿#pragma once
+#include <string>
 
-class Shader
+struct ShaderSource
 {
-public:
-    
+    std::string VertexSource;
+    std::string FragmentSource;
+};
+
+namespace Shader
+{
+    extern unsigned int Program;
+    ShaderSource ReadShaderFromFile(const char* filepathVert, const char* filepathFrag);
+    void CreateProgram();
 };
