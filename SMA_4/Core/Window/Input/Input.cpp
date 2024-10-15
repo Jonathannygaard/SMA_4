@@ -1,13 +1,18 @@
 ﻿#include "Input.h"
 #include "../../Engine.h"
+#include "../../Entity/Entity.h"
 
 void Input::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-void KeyBoardInput::processInput(GLFWwindow* window, Cube* player)
+void KeyBoardInput::processInput(GLFWwindow* window, Entity* player)
 {
+    if(glfwGetKey(window,GLFW_KEY_ESCAPE)==GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
 }
 
 namespace MouseInput

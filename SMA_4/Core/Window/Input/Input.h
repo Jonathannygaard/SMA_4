@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <GLFW/glfw3.h>
 
+class Entity;
 class Cube;
 class Camera;
 struct GLFWwindow;
@@ -14,7 +15,7 @@ public:
 class KeyBoardInput
 {
 public:
-    static void processInput(GLFWwindow* window, Cube* player);
+    static void processInput(GLFWwindow* window, Entity* player);
 };
 
 namespace MouseInput

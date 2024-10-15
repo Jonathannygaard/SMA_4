@@ -1,9 +1,6 @@
 ﻿#include "Camera.h"
 #include <glad/glad.h>
 #include "../../Shader/Shader.h"
-#include "glm/gtx/matrix_transform_2d.hpp"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtx/rotate_vector.hpp"
 
 void Camera::init() {
     viewLoc = glGetUniformLocation(Shader::Program, "view");

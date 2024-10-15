@@ -4,6 +4,7 @@
 #include <iostream>
 #include <glad/glad.h>
 
+unsigned int Shader::Program;
 ShaderSource Shader::ReadShaderFromFile(const char* filepathVert, const char* filepathFrag)
 {
     ShaderSource currentSource;

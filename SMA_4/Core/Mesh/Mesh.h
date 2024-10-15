@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <vector>
 #include <glm/vec3.hpp>
-#include <glad/glad.h>
 #include <glm/vec4.hpp>
 
 struct Vertex
@@ -22,7 +21,7 @@ class Mesh
 {
 public:
     std::vector<Vertex> Vertices;
-    std::vector<GLuint> Indices;
+    std::vector<unsigned int> Indices;
 
     virtual void Draw(glm::vec4 model);
     virtual void Create(glm::vec3 color);
