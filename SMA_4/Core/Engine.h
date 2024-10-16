@@ -14,6 +14,7 @@ public:
 
   ComponentManager componentManager;
   MeshSystem meshSystem;
+  MovementSystem movementSystem;
 
   void Create();
   void setup();
@@ -21,8 +22,14 @@ public:
   void run();
   void Draw();
 
-  Engine() : meshSystem(componentManager) {}
-
+  std::vector<Entity> entities;
+    
   Entity player;
+  Entity enemy;
+
+  
+  Engine() : meshSystem(componentManager), movementSystem(componentManager) {}
+
+ 
     
 };

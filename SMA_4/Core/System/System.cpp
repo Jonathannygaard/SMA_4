@@ -3,11 +3,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "../Components/Component.h"
 #include "../Shader/Shader.h"
+#include "../Engine.h"
 
 void MovementSystem::MoveEntity(Entity* entity)
 {
     static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(entity).Position +=
-        static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement;
+        static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement *
+            static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Speed
+    * Engine::DeltaTime;
 }
 
 void MeshSystem::DrawMesh(Entity* entity)
@@ -52,19 +55,19 @@ void MeshSystem::BindBuffers(Entity* entity)
     glBindVertexArray(0);
 }
 
-void MeshSystem::CreateCubeMesh(Entity* entity)
+void MeshSystem::CreateCubeMesh(Entity* entity, glm::vec3 color)
 {
     ComponentHandler<MeshComponent>* componenthandler = componentmanager.GetComponentHandler<MeshComponent>();
     MeshComponent& mesh = componenthandler->GetComponent(entity);
     
-    Vertex v0{glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f)}; /* Front-Bot-left */
-    Vertex v1{ glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f)}; /* Front-Bot-right */
-    Vertex v2{ glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 0.f, 0.f)}; /* Front-Top-right */
-    Vertex v3{ glm::vec3(0.f, 1.f, 0.f), glm::vec3(1.f, 0.f, 0.f)}; /* Front-Top-left */
-    Vertex v4{ glm::vec3(0.f, 0.f, -1.f), glm::vec3(1.f, 0.f, 0.f)}; /* Back-Bot-left */
-    Vertex v5{ glm::vec3(1.f, 0.f, -1.f), glm::vec3(1.f, 0.f, 0.f)}; /* Back-Bot-right */
-    Vertex v6{ glm::vec3(1.f, 1.f, -1.f), glm::vec3(1.f, 0.f, 0.f)}; /* Back-Top-right */
-    Vertex v7{ glm::vec3(0.f, 1.f, -1.f), glm::vec3(1.f, 0.f, 0.f)}; /* Back-Top-left */
+    Vertex v0{glm::vec3(0.f, 0.f, 0.f), color}; /* Front-Bot-left */
+    Vertex v1{ glm::vec3(1.f, 0.f, 0.f), color}; /* Front-Bot-right */
+    Vertex v2{ glm::vec3(1.f, 1.f, 0.f), color}; /* Front-Top-right */
+    Vertex v3{ glm::vec3(0.f, 1.f, 0.f), color}; /* Front-Top-left */
+    Vertex v4{ glm::vec3(0.f, 0.f, -1.f),color}; /* Back-Bot-left */
+    Vertex v5{ glm::vec3(1.f, 0.f, -1.f),color}; /* Back-Bot-right */
+    Vertex v6{ glm::vec3(1.f, 1.f, -1.f),color}; /* Back-Top-right */
+    Vertex v7{ glm::vec3(0.f, 1.f, -1.f),color}; /* Back-Top-left */
 
     mesh.Vertices.emplace_back(v0);
     mesh.Vertices.emplace_back(v1);

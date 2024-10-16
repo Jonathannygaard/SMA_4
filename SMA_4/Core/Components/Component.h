@@ -64,6 +64,7 @@ class MovementComponent : public Component
 {
 public:
     glm::vec3 Movement;
+    float Speed;
 };
 
 class HealthComponent : public Component

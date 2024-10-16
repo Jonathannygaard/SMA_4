@@ -16,6 +16,7 @@ glm::mat4 Camera::getView() {
 glm::mat4 Camera::getProjection(float width, float height) {
     glm::mat4 proj = glm::mat4(1.f);
     proj = glm::perspective(glm::radians(45.0f), width / height, 0.1f, 100.0f);
+    //proj = glm::ortho(-width/height, width/height, -1.f, 1.f);
     return proj;
 }
 

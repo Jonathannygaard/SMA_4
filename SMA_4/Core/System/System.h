@@ -9,7 +9,7 @@ class MovementSystem : public System
 public:
     ComponentManager& componentmanager;
     MovementSystem(ComponentManager& componentManager) : componentmanager(componentManager) {}
-    void MoveEntity(Entity* entity);  
+    void MoveEntity(Entity* entity);
 };
 
 class MeshSystem : public System
@@ -19,6 +19,15 @@ public:
     MeshSystem(ComponentManager& componentManager) : componentmanager(componentManager) {}
     void DrawMesh(Entity* entity);
     void BindBuffers(Entity* entity);
-    void CreateCubeMesh(Entity* entity);
+    void CreateCubeMesh(Entity* entity, glm::vec3 color);
+};
+
+class AISystem : public System
+{
+public:
+    ComponentManager& componentmanager;
+    AISystem(ComponentManager& componentManager) : componentmanager(componentManager) {}
+    void MoveEntity(Entity* entity);
+    
 };
 

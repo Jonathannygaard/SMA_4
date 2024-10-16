@@ -34,6 +34,6 @@ GLFWwindow* Window::init()
     Shader::CreateProgram();
     glfwSetFramebufferSizeCallback(window,Input::framebuffer_size_callback);
     glfwSetMouseButtonCallback(window, MouseInput::mouse_button_callback);
-    glfwSetCursorPosCallback(window, MouseInput::mouse_callback);
+    //glfwSetCursorPosCallback(window, MouseInput::mouse_callback);
     return window;
 }
