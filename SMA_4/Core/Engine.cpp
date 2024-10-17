@@ -1,4 +1,6 @@
 ﻿#include "Engine.h"
+#include <iostream>
+#include <ostream>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "Color.h"
@@ -10,30 +12,36 @@
 void Engine::Create()
 {
     //Creating player and enemy entities and adding them to the entities vector
-    player.ID = entities.size();
-    entities.push_back(player);
-    enemy.ID = entities.size();
-    entities.push_back(enemy);
-    
-    //Creating player entity and adding components
-    componentManager.AddComponent<MeshComponent>(&player);
-    componentManager.AddComponent<PositionComponent>(&player);
-    componentManager.AddComponent<MovementComponent>(&player);
-    meshSystem.CreateCubeMesh(&player, Color::Green);
+    for(int AmountOfEntities = 0; AmountOfEntities < 4; AmountOfEntities++)
+    {
+        entities.emplace_back(entities.size());
+    }
 
-    //Setting up player entity
-    componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&player).Speed = 5.f;
-    componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&player).Position = glm::vec3(0.f, 0.f, -10.f);
-
-    //Creating enemy entity and adding components
-    componentManager.AddComponent<MeshComponent>(&enemy);
-    componentManager.AddComponent<PositionComponent>(&enemy);
-    componentManager.AddComponent<MovementComponent>(&enemy);
-    meshSystem.CreateCubeMesh(&enemy, Color::Red);
-
-    //Setting up enemy entity
-    componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&enemy).Speed = 3.f;
-    componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&enemy).Position = glm::vec3(0.f, 5.f, -10.f);
+    srand(time(NULL));
+    //Adding components to entities
+    for(Entity entity : entities)
+    {
+        componentManager.AddComponent<MeshComponent>(&entity);
+        componentManager.AddComponent<PositionComponent>(&entity);
+        componentManager.AddComponent<MovementComponent>(&entity);
+        componentManager.AddComponent<CollisionComponent>(&entity);
+        componentManager.AddComponent<HealthComponent>(&entity);
+        if(entity.ID == 0)
+        {
+            meshSystem.CreateCubeMesh(&entity, Color::Green);
+            componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&entity).Speed = 5.f;
+        }
+        else
+        {
+            meshSystem.CreateCubeMesh(&entity, Color::Red);
+            componentManager.AddComponent<CombatComponent>(&entity);
+            componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&entity).Speed = 3.f;
+            componentManager.GetComponentHandler<CombatComponent>()->GetComponent(&entity).damage = 1;
+        }
+        componentManager.GetComponentHandler<HealthComponent>()->GetComponent(&entity).Health = 5;
+        componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&entity).Position =
+                glm::vec3(rand()%18-9, rand()%10-5, -10.f);
+    }
 }
 
 void Engine::setup()
@@ -46,13 +54,34 @@ void Engine::setup()
 
 void Engine::Draw()
 {
-    meshSystem.DrawMesh(&player);
-    meshSystem.DrawMesh(&enemy);
+    for(Entity entity : entities)
+    {
+        meshSystem.DrawMesh(&entity);
+    }
 }
 
 void Engine::update()
 {
-    movementSystem.MoveEntity(&player);
+    for(Entity entity: entities)
+    {
+        collisionSystem.UpdatePosition(&entity);
+        if(entity.ID != 0)
+        {
+            if(collisionSystem.CheckCollision(&entities[0], &entity))
+            {
+                combatSystem.Attack(&entity, &entities[0]);
+                static_cast<ComponentHandler<MovementComponent>*>(componentManager.Components[typeid(MovementComponent)])->
+                GetComponent(&entity).Movement = glm::vec3(0.f);
+            }
+            else
+            {
+                npcMovementSystem.FindDirection(&entity, &entities[0]);
+                npcMovementSystem.MoveEntity(&entity, &entities[0]);
+            }
+            combatSystem.DelayTimer(&entity);
+        }
+    }
+    movementSystem.MoveEntity(&entities[0]);
     Draw();
 }
 
@@ -60,13 +89,19 @@ void Engine::run()
 {
     setup();
     float FirstFrame = 0.0f;
-    
+    float secondcounter = 0.f;
     glm::vec3 color(Color::Black);
     while(!glfwWindowShouldClose(Window))
     {
         const auto CurrentFrame = static_cast<float>(glfwGetTime());
         DeltaTime = CurrentFrame - FirstFrame;
         FirstFrame = CurrentFrame;
+        secondcounter += DeltaTime;
+        if(secondcounter >= 1.f)
+        {
+            secondcounter = 0.f;
+            std::cout << "Player Health: " << componentManager.GetComponentHandler<HealthComponent>()->GetComponent(&entities[0]).Health << std::endl;
+        }
         
         glClearColor(color.x, color.y, color.z, 1.f);
         glClear(GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT);
@@ -77,7 +112,7 @@ void Engine::run()
         glUniformMatrix4fv(MainCamera.projectionLoc, 1, GL_FALSE, glm::value_ptr(MainCamera.getProjection(Window::Width, Window::Height)));
         glUniformMatrix4fv(MainCamera.viewLoc, 1, GL_FALSE, glm::value_ptr(MainCamera.getView()));
 
-        KeyBoardInput::processInput(Window, &player, &componentManager);
+        KeyBoardInput::processInput(Window, &entities[0], &componentManager);
     
         glfwSwapBuffers(Window);
         glfwPollEvents();

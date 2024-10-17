@@ -23,7 +23,7 @@ GLFWwindow* Window::init()
         return nullptr;
     }
     glfwMakeContextCurrent(window);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -34,6 +34,6 @@ GLFWwindow* Window::init()
     Shader::CreateProgram();
     glfwSetFramebufferSizeCallback(window,Input::framebuffer_size_callback);
     glfwSetMouseButtonCallback(window, MouseInput::mouse_button_callback);
-    //glfwSetCursorPosCallback(window, MouseInput::mouse_callback);
+    glfwSetCursorPosCallback(window, MouseInput::mouse_callback);
     return window;
 }

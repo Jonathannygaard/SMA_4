@@ -11,6 +11,20 @@
 class Component{};
 class ComponentH{};
 
+struct Vertex
+{
+    glm::vec3 Position;
+    glm::vec3 Color;
+    glm::vec3 Normal;
+    Vertex(glm::vec3 Pos, glm::vec3 rgb) : Position(Pos), Color(rgb){}
+};
+
+struct Triangles
+{
+    unsigned int a, b, c;
+    Triangles(unsigned int a, unsigned int b, unsigned int c) : a(a), b(b), c(c){}
+};
+
 template<typename T>
 class ComponentHandler : public ComponentH
 {
@@ -70,22 +84,8 @@ public:
 class HealthComponent : public Component
 {
 public:
-    int Healths;
+    int Health;
 
-};
-
-struct Vertex
-{
-    glm::vec3 Position;
-    glm::vec3 Color;
-    glm::vec3 Normal;
-    Vertex(glm::vec3 Pos, glm::vec3 rgb) : Position(Pos), Color(rgb){}
-};
-
-struct Triangles
-{
-    unsigned int a, b, c;
-    Triangles(unsigned int a, unsigned int b, unsigned int c) : a(a), b(b), c(c){}
 };
 
 class MeshComponent : public Component
@@ -97,4 +97,18 @@ public:
     std::vector<Triangles> Indices;
 
     unsigned int VAO;
+};
+
+class CollisionComponent : public Component
+{
+public:
+    glm::vec3 min;
+    glm::vec3 max;
+};
+
+class CombatComponent : public Component
+{
+public:
+    int damage;
+    float delay;
 };

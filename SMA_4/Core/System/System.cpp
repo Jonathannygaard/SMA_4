@@ -1,4 +1,6 @@
 ﻿#include "System.h"
+
+#include <iostream>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "../Components/Component.h"
@@ -11,6 +13,22 @@ void MovementSystem::MoveEntity(Entity* entity)
         static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement *
             static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Speed
     * Engine::DeltaTime;
+}
+
+void NPCMovementSystem::MoveEntity(Entity* entity, Entity* target)
+{
+    CollisionSystem collisionSystem(componentmanager);
+    static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(entity).Position +=
+        static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement *
+            static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Speed
+    * Engine::DeltaTime;
+}
+
+void NPCMovementSystem::FindDirection(Entity* entity, Entity* target)
+{
+    static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement =
+        glm::normalize(static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(target).Position -
+            static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(entity).Position);
 }
 
 void MeshSystem::DrawMesh(Entity* entity)
@@ -103,6 +121,62 @@ void MeshSystem::CreateCubeMesh(Entity* entity, glm::vec3 color)
     mesh.Indices.emplace_back(5,1,0);
 
     BindBuffers(entity);
+}
+
+bool CollisionSystem::CheckCollision(Entity* entity1, Entity* entity2)
+{
+    if(entity1 == nullptr || entity2 == nullptr)
+    {
+        return false;
+    }
+    if(entity1 == entity2)
+    {
+        return false;
+    }
+    glm::vec3 min1 = static_cast<ComponentHandler<CollisionComponent>*>(componentmanager.Components[typeid(CollisionComponent)])->GetComponent(entity1).min;
+    glm::vec3 max1 = static_cast<ComponentHandler<CollisionComponent>*>(componentmanager.Components[typeid(CollisionComponent)])->GetComponent(entity1).max;
+    glm::vec3 min2 = static_cast<ComponentHandler<CollisionComponent>*>(componentmanager.Components[typeid(CollisionComponent)])->GetComponent(entity2).min;
+    glm::vec3 max2 = static_cast<ComponentHandler<CollisionComponent>*>(componentmanager.Components[typeid(CollisionComponent)])->GetComponent(entity2).max;
+    
+    if(min2.x < max1.x && max2.x > min1.x &&
+        min2.y < max1.y && max2.y > min1.y &&
+        max1.z < min2.z && min1.z > max2.z)
+    {
+        return true;
+    }
+    return false;
+}
+
+void CollisionSystem::UpdatePosition(Entity* entity)
+{
+    static_cast<ComponentHandler<CollisionComponent>*>(componentmanager.Components[typeid(CollisionComponent)])->GetComponent(entity).min =
+        static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(entity).Position;
+
+    static_cast<ComponentHandler<CollisionComponent>*>(componentmanager.Components[typeid(CollisionComponent)])->GetComponent(entity).max =
+        static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(entity).Position
+            + glm::vec3 (1.f, 1.f, -1.f);
+}
+
+void CombatSystem::Attack(Entity* entity1, Entity* entity2)
+{
+    if(static_cast<ComponentHandler<CombatComponent>*>(componentmanager.Components[typeid(CombatComponent)])->GetComponent(entity1).delay <= 0)
+    {
+        TakeDamage(entity2, static_cast<ComponentHandler<CombatComponent>*>(componentmanager.Components[typeid(CombatComponent)])->GetComponent(entity1).damage);
+        static_cast<ComponentHandler<CombatComponent>*>(componentmanager.Components[typeid(CombatComponent)])->GetComponent(entity1).delay = 1.f;
+    }
+}
+
+void CombatSystem::TakeDamage(Entity* entity, int damage)
+{
+    static_cast<ComponentHandler<HealthComponent>*>(componentmanager.Components[typeid(HealthComponent)])->GetComponent(entity).Health -= damage;
+}
+
+void CombatSystem::DelayTimer(Entity* entity)
+{
+    if(static_cast<ComponentHandler<CombatComponent>*>(componentmanager.Components[typeid(CombatComponent)])->GetComponent(entity).delay >= 0)
+    {
+        static_cast<ComponentHandler<CombatComponent>*>(componentmanager.Components[typeid(CombatComponent)])->GetComponent(entity).delay -= Engine::DeltaTime;
+    }
 }
 
 
