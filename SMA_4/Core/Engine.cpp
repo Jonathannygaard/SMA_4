@@ -75,8 +75,8 @@ void Engine::update()
             }
             else
             {
-                npcMovementSystem.FindDirection(&entity, &entities[0]);
-                npcMovementSystem.MoveEntity(&entity, &entities[0]);
+                movementSystem.FindDirection(&entity, &entities[0]);
+                movementSystem.MoveEntity(&entity);
             }
             combatSystem.DelayTimer(&entity);
         }

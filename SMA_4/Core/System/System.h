@@ -10,14 +10,6 @@ public:
     ComponentManager& componentmanager;
     MovementSystem(ComponentManager& componentManager) : componentmanager(componentManager) {}
     void MoveEntity(Entity* entity);
-};
-
-class NPCMovementSystem : public System
-{
-public:
-    ComponentManager& componentmanager;
-    NPCMovementSystem(ComponentManager& componentManager) : componentmanager(componentManager) {}
-    void MoveEntity(Entity* entity, Entity* target);
     void FindDirection(Entity* entity, Entity* target);
 };
 

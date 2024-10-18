@@ -15,16 +15,7 @@ void MovementSystem::MoveEntity(Entity* entity)
     * Engine::DeltaTime;
 }
 
-void NPCMovementSystem::MoveEntity(Entity* entity, Entity* target)
-{
-    CollisionSystem collisionSystem(componentmanager);
-    static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(entity).Position +=
-        static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement *
-            static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Speed
-    * Engine::DeltaTime;
-}
-
-void NPCMovementSystem::FindDirection(Entity* entity, Entity* target)
+void MovementSystem::FindDirection(Entity* entity, Entity* target)
 {
     static_cast<ComponentHandler<MovementComponent>*>(componentmanager.Components[typeid(MovementComponent)])->GetComponent(entity).Movement =
         glm::normalize(static_cast<ComponentHandler<PositionComponent>*>(componentmanager.Components[typeid(PositionComponent)])->GetComponent(target).Position -

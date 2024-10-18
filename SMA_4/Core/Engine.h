@@ -15,7 +15,6 @@ public:
   ComponentManager componentManager;
   MeshSystem meshSystem;
   MovementSystem movementSystem;
-  NPCMovementSystem npcMovementSystem;
   CollisionSystem collisionSystem;
   CombatSystem combatSystem;
 
@@ -28,5 +27,5 @@ public:
   std::vector<Entity> entities;
   
   Engine() : meshSystem(componentManager), movementSystem(componentManager),
-                npcMovementSystem(componentManager), collisionSystem(componentManager), combatSystem(componentManager) {}
+                collisionSystem(componentManager), combatSystem(componentManager) {}
 };

@@ -38,7 +38,7 @@ public:
         EntityToIndex[entity->ID] = Components.size() - 1;
     }
 
-    T& GetComponent(Entity* entity)
+    T& GetComponent(Entity* entity) 
     {
         if(EntityToIndex.contains(entity->ID))
         {
