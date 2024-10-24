@@ -12,35 +12,56 @@
 void Engine::Create()
 {
     //Creating player and enemy entities and adding them to the entities vector
-    for(int AmountOfEntities = 0; AmountOfEntities < 4; AmountOfEntities++)
+    entities.emplace_back(0);
+    for(int AmountOfEnemies = 0; AmountOfEnemies < 2; AmountOfEnemies++)
     {
+        enemies.emplace_back(entities.size());
         entities.emplace_back(entities.size());
     }
-
+    for(int AmountOfPickups = 0; AmountOfPickups < 2; AmountOfPickups++)
+    {
+        pickups.emplace_back(entities.size());
+        entities.emplace_back(entities.size());
+    }
     srand(time(NULL));
-    //Adding components to entities
-    for(Entity entity : entities)
+    
+    componentManager.AddComponent<MeshComponent>(&entities[0]);
+    componentManager.AddComponent<PositionComponent>(&entities[0]);
+    componentManager.AddComponent<MovementComponent>(&entities[0]);
+    componentManager.AddComponent<CollisionComponent>(&entities[0]);
+    componentManager.AddComponent<HealthComponent>(&entities[0]);
+
+    meshSystem.CreateCubeMesh(&entities[0], Color::Cyan);
+    componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&entities[0]).Speed = 5.f;
+    componentManager.GetComponentHandler<HealthComponent>()->GetComponent(&entities[0]).Health = 5;
+    componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&entities[0]).Position =
+                    glm::vec3(rand()%18-9, rand()%10-5, -10.f);
+        
+    for(Entity entity : enemies)
     {
         componentManager.AddComponent<MeshComponent>(&entity);
         componentManager.AddComponent<PositionComponent>(&entity);
         componentManager.AddComponent<MovementComponent>(&entity);
         componentManager.AddComponent<CollisionComponent>(&entity);
         componentManager.AddComponent<HealthComponent>(&entity);
-        if(entity.ID == 0)
-        {
-            meshSystem.CreateCubeMesh(&entity, Color::Green);
-            componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&entity).Speed = 5.f;
-        }
-        else
-        {
-            meshSystem.CreateCubeMesh(&entity, Color::Red);
-            componentManager.AddComponent<CombatComponent>(&entity);
-            componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&entity).Speed = 3.f;
-            componentManager.GetComponentHandler<CombatComponent>()->GetComponent(&entity).damage = 1;
-        }
+        componentManager.AddComponent<CombatComponent>(&entity);
+        
+        meshSystem.CreateCubeMesh(&entity, Color::Red);
+        componentManager.GetComponentHandler<MovementComponent>()->GetComponent(&entity).Speed = 3.f;
+        componentManager.GetComponentHandler<CombatComponent>()->GetComponent(&entity).damage = 1;
         componentManager.GetComponentHandler<HealthComponent>()->GetComponent(&entity).Health = 5;
         componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&entity).Position =
-                glm::vec3(rand()%18-9, rand()%10-5, -10.f);
+                        glm::vec3(rand()%18-9, rand()%10-5, -10.f);
+    }
+    for(Entity entity: pickups)
+    {
+        componentManager.AddComponent<MeshComponent>(&entity);
+        componentManager.AddComponent<PositionComponent>(&entity);
+        componentManager.AddComponent<CollisionComponent>(&entity);
+
+        meshSystem.CreateCubeMesh(&entity, Color::Green);
+        componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&entity).Position =
+                glm::vec3(rand()%18-9, rand()%10-4, -10.f);
     }
 }
 
@@ -62,25 +83,38 @@ void Engine::Draw()
 
 void Engine::update()
 {
-    for(Entity entity: entities)
+    if(static_cast<ComponentHandler<HealthComponent>*>(componentManager.Components[typeid(HealthComponent)])->GetComponent(&entities[0]).Health <= 0)
+    {
+        std::cout << "Player has died" << std::endl;
+        glfwSetWindowShouldClose(Window, true);
+    }
+    collisionSystem.UpdatePosition(&entities[0]);
+    for(Entity entity : enemies)
     {
         collisionSystem.UpdatePosition(&entity);
-        if(entity.ID != 0)
+        if(collisionSystem.CheckCollision(&entities[0], &entity))
         {
-            if(collisionSystem.CheckCollision(&entities[0], &entity))
-            {
-                combatSystem.Attack(&entity, &entities[0]);
-                static_cast<ComponentHandler<MovementComponent>*>(componentManager.Components[typeid(MovementComponent)])->
-                GetComponent(&entity).Movement = glm::vec3(0.f);
-            }
-            else
-            {
-                movementSystem.FindDirection(&entity, &entities[0]);
-                movementSystem.MoveEntity(&entity);
-            }
-            combatSystem.DelayTimer(&entity);
+            combatSystem.Attack(&entity, &entities[0]);
+            static_cast<ComponentHandler<MovementComponent>*>(componentManager.Components[typeid(MovementComponent)])->
+            GetComponent(&entity).Movement = glm::vec3(0.f);
         }
+        else
+        {
+            movementSystem.FindDirection(&entity, &entities[0]);
+            movementSystem.MoveEntity(&entity);
+        }
+        combatSystem.DelayTimer(&entity);
     }
+   for (Entity entity : pickups)
+   {
+       collisionSystem.UpdatePosition(&entity);
+       if(collisionSystem.CheckCollision(&entities[0], &entity))
+       {
+           componentManager.GetComponentHandler<HealthComponent>()->GetComponent(&entities[0]).Health += 1;
+           componentManager.GetComponentHandler<PositionComponent>()->GetComponent(&entity).Position =
+                   glm::vec3(rand()%18-9, rand()%10-5, -10.f);
+       }
+   }
     movementSystem.MoveEntity(&entities[0]);
     Draw();
 }
@@ -97,7 +131,7 @@ void Engine::run()
         DeltaTime = CurrentFrame - FirstFrame;
         FirstFrame = CurrentFrame;
         secondcounter += DeltaTime;
-        if(secondcounter >= 1.f)
+        if(secondcounter >= 0.2f)
         {
             secondcounter = 0.f;
             std::cout << "Player Health: " << componentManager.GetComponentHandler<HealthComponent>()->GetComponent(&entities[0]).Health << std::endl;

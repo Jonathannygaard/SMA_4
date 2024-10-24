@@ -24,6 +24,8 @@ public:
   void run();
   void Draw();
 
+  std::vector<Entity> pickups;  
+  std::vector<Entity> enemies;  
   std::vector<Entity> entities;
   
   Engine() : meshSystem(componentManager), movementSystem(componentManager),

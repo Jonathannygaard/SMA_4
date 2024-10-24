@@ -48,10 +48,6 @@ void KeyBoardInput::processInput(GLFWwindow* window, Entity* player, ComponentMa
     {
         componentManager->GetComponentHandler<MovementComponent>()->GetComponent(player).Movement.x = 1.f;
     }
-    if(glfwGetKey(window,GLFW_KEY_E)==GLFW_PRESS)
-    {
-        componentManager->GetComponentHandler<HealthComponent>()->GetComponent(player).Health = 5;
-    }
 }
 
 namespace MouseInput
